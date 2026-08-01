@@ -1,5 +1,5 @@
-// Replace with your VPS HTTPS URL or Cloudflare Tunnel URL when deploying production
-const PRODUCTION_API_URL = "http://YOUR_VPS_IP:3000/api/scavenger"; 
+
+const PRODUCTION_API_URL = "http://YOUR_VPS_IP:3000/api/scavenger";
 
 const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '3000')
     ? `${window.location.origin}/api/scavenger`
