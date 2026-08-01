@@ -1,6 +1,9 @@
-const API_BASE = (window.location.origin.includes(':3000'))
+// Replace with your VPS HTTPS URL or Cloudflare Tunnel URL when deploying production
+const PRODUCTION_API_URL = "http://YOUR_VPS_IP:3000/api/scavenger"; 
+
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.port === '3000')
     ? `${window.location.origin}/api/scavenger`
-    : `http://localhost:3000/api/scavenger`;
+    : PRODUCTION_API_URL;
 
 const SIERRA_DIALOGUES = {
     unauthenticated: "Greetings visitor. Attempting bio-signature recognition... Scanning... Unable to verify identity automatically. Please authenticate identify yourself.",
@@ -511,44 +514,28 @@ function updateSidebarUI(claimedSkins = [], stage = 0) {
 }
 
 async function fetchUserStatus(userId) {
-    const endpoints = [
-        `${API_BASE}/status?userId=${encodeURIComponent(userId)}`,
-        `http://localhost:3000/api/scavenger/status?userId=${encodeURIComponent(userId)}`,
-        `http://127.0.0.1:3000/api/scavenger/status?userId=${encodeURIComponent(userId)}`
-    ];
-
-    for (const ep of endpoints) {
-        try {
-            const res = await fetch(ep);
-            if (res.ok) {
-                const data = await res.json();
-                return data;
-            }
-        } catch (e) { }
-    }
+    try {
+        const res = await fetch(`${API_BASE}/status?userId=${encodeURIComponent(userId)}`);
+        if (res.ok) {
+            const data = await res.json();
+            return data;
+        }
+    } catch (e) { }
 
     return null;
 }
 
 async function submitCodeToApi(userId, code) {
-    const endpoints = [
-        `${API_BASE}/verify-code`,
-        `http://localhost:3000/api/scavenger/verify-code`,
-        `http://127.0.0.1:3000/api/scavenger/verify-code`
-    ];
-
-    for (const ep of endpoints) {
-        try {
-            const res = await fetch(ep, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, code })
-            });
-            if (res.ok) {
-                return await res.json();
-            }
-        } catch (e) { }
-    }
+    try {
+        const res = await fetch(`${API_BASE}/verify-code`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, code })
+        });
+        if (res.ok) {
+            return await res.json();
+        }
+    } catch (e) { }
 
     return { success: false, message: "Server connection failed." };
 }
@@ -604,26 +591,17 @@ btnSearchRepuls.addEventListener('click', async () => {
     startProcessingSound();
 
     try {
-        const endpoints = [
-            `${API_BASE}/verify-repuls`,
-            `http://localhost:3000/api/scavenger/verify-repuls`,
-            `http://127.0.0.1:3000/api/scavenger/verify-repuls`
-        ];
-
         let resObj = null;
-        for (const ep of endpoints) {
-            try {
-                const res = await fetch(ep, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query })
-                });
-                if (res.ok || res.status === 404) {
-                    resObj = await res.json();
-                    break;
-                }
-            } catch (e) { }
-        }
+        try {
+            const res = await fetch(`${API_BASE}/verify-repuls`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query })
+            });
+            if (res.ok || res.status === 404) {
+                resObj = await res.json();
+            }
+        } catch (e) { }
 
         stopProcessingSound();
 
@@ -672,26 +650,17 @@ btnConfirmRepuls.addEventListener('click', async () => {
     startProcessingSound();
 
     try {
-        const endpoints = [
-            `${API_BASE}/confirm-repuls`,
-            `http://localhost:3000/api/scavenger/confirm-repuls`,
-            `http://127.0.0.1:3000/api/scavenger/confirm-repuls`
-        ];
-
         let success = false;
-        for (const ep of endpoints) {
-            try {
-                const res = await fetch(ep, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: currentUser.id, account: pendingRepulsAccount })
-                });
-                if (res.ok) {
-                    success = true;
-                    break;
-                }
-            } catch (e) { }
-        }
+        try {
+            const res = await fetch(`${API_BASE}/confirm-repuls`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: currentUser.id, account: pendingRepulsAccount })
+            });
+            if (res.ok) {
+                success = true;
+            }
+        } catch (e) { }
 
         stopProcessingSound();
 
