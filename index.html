@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scavenger Hunt</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="sierra.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Turret+Road:wght@200;300;400;500;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Creepster&family=JetBrains+Mono:wght@400;700&family=Monoton&family=Orbitron:wght@600;900&family=Outfit:wght@400;700&family=Playfair+Display:ital,wght@1,700&family=Press+Start+2P&family=Rubik+Glitch&family=VT323&display=swap" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/fflate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+</head>
+<body>
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div id="title-container" class="title-container"></div>
+            <span class="loading-text">INITIALIZING SYSTEM...</span>
+            <div class="loading-dots">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        </div>
+    </div>
+
+    <audio id="typing-audio" src="typing.mp3" preload="auto" loop></audio>
+    <audio id="enter-audio" src="enter.mp3" preload="auto"></audio>
+    <audio id="error-audio" src="error.mp3" preload="auto"></audio>
+    <audio id="click-audio" src="click.mp3" preload="auto"></audio>
+    <audio id="processing-audio" src="processing.mp3" preload="auto" loop></audio>
+    <audio id="crash-audio" src="crash.mp3" preload="auto"></audio>
+    <audio id="crash2-audio" src="crash 2.mp3" preload="auto"></audio>
+    <audio id="off-audio" src="off.mp3" preload="auto"></audio>
+    <audio id="hold-me-audio" src="Blood Nose - hold me in your arms.mp3" preload="auto" loop></audio>
+
+    <div id="vault-animation-overlay" class="vault-overlay hidden">
+        <div class="vault-viewport" id="vault-viewport-el">
+            <div class="vault-casing-frame">
+                
+                <div class="vault-inner-chamber">
+                    <div class="vault-chamber-grid"></div>
+                </div>
+
+                
+                <div class="vault-casing-ring">
+                    <div class="casing-dashed-ring"></div>
+                    <div class="casing-bolt bolt-1"></div>
+                    <div class="casing-bolt bolt-2"></div>
+                    <div class="casing-bolt bolt-3"></div>
+                    <div class="casing-bolt bolt-4"></div>
+                    <div class="casing-bolt bolt-5"></div>
+                    <div class="casing-bolt bolt-6"></div>
+                    <div class="casing-bolt bolt-7"></div>
+                    <div class="casing-bolt bolt-8"></div>
+                </div>
+
+                
+                <div class="vault-hinged-door" id="vault-hinged-door-el">
+                    
+                    <div class="vault-door-outer-ring">
+                        <div class="vault-door-dashed-bevel"></div>
+                        <div class="vault-door-inner-bevel"></div>
+                        
+                        
+                        <div class="vault-locking-bar bar-top-left"></div>
+                        <div class="vault-locking-bar bar-bottom-left"></div>
+
+                        
+                        <div class="vault-wheel-center" id="vault-wheel-el">
+                            <div class="vault-wheel-spoke spoke-1"></div>
+                            <div class="vault-wheel-spoke spoke-2"></div>
+                            <div class="vault-wheel-spoke spoke-3"></div>
+                            <div class="vault-wheel-spoke spoke-4"></div>
+                            <div class="vault-wheel-ring">
+                                <img src="repuls_logo.png" class="repuls-stencil-img" alt="REPULS Stencil" />
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                    <div class="vault-hinge-structure">
+                        <div class="hinge-bracket bracket-top"></div>
+                        <div class="hinge-beam-arm"></div>
+                        <div class="hinge-bracket bracket-bottom"></div>
+                        <div class="hinge-vertical-bar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="terminal-container">
+        <main class="main-viewport">
+            <section class="avatar-section">
+                <div id="sierra-3d-wrapper" class="sierra-3d-container">
+                    <img src="sierra_helmet.png" id="sierra-helmet-img" class="sierra-helmet-image" alt="Sierra Helmet" />
+                </div>
+            </section>
+
+            <section class="dialogue-section">
+                <div id="dialogue-box" class="plain-text-box">
+                    <span id="typewriter-text"></span>
+                    <span id="cursor" class="typing-cursor">_</span>
+                </div>
+
+                <div id="interactive-area" class="interactive-panel hidden">
+                    <div id="login-panel" class="action-panel hidden">
+                        <button id="btn-discord-login" class="btn-terminal btn-discord">IDENTIFY MYSELF</button>
+                    </div>
+
+                    <div id="repuls-link-panel" class="action-panel hidden">
+                        <div class="input-group">
+                            <input type="text" id="repuls-input" placeholder="Repuls Name / PlayFab ID..." autocomplete="off" />
+                            <button id="btn-search-repuls" class="btn-terminal">SEARCH RECORDS</button>
+                        </div>
+                        <div id="repuls-link-hint" class="hint-text hidden"></div>
+                    </div>
+
+                    <div id="repuls-confirm-panel" class="action-panel hidden">
+                        <div id="repuls-confirm-details" class="plain-text-box" style="font-size: 1rem; color: #3498db; margin-bottom: 1rem;"></div>
+                        <div class="input-group">
+                            <button id="btn-confirm-repuls" class="btn-terminal" style="border-color: #2ecc71; color: #2ecc71;">CONFIRM</button>
+                            <button id="btn-retry-repuls" class="btn-terminal" style="border-color: #e74c3c; color: #e74c3c;">RETRY</button>
+                        </div>
+                    </div>
+
+                    <div id="cipher-image-panel" class="action-panel hidden" style="margin-bottom: 1rem;">
+                        <img id="cipher-svg-img" src="" alt="Cipher Signal" style="width: 100%; max-width: 280px; max-height: 280px; margin: 0 auto; display: block; border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);" />
+                    </div>
+
+                    <div id="timed-challenge-panel" class="action-panel hidden" style="flex-direction: column; align-items: center; width: 100%;">
+                        <div id="timed-timer-display" style="font-family: var(--font-mono); font-size: 1.6rem; color: #ff3333; font-weight: bold; margin-bottom: 0.5rem;">[ TIME REMAINING: 10s ]</div>
+                        <div id="timed-prompt-text" style="font-family: var(--font-sans); font-size: 1.1rem; color: #ffffff; margin-bottom: 1rem; text-align: center;">Send phrase in Discord: ...</div>
+                        <button id="btn-retry-timed" class="btn-terminal hidden" style="border-color: #ff3333; color: #ff3333; margin-top: 0.5rem;">RETRY OVERRIDE</button>
+                    </div>
+
+                    <div id="code-panel" class="action-panel hidden">
+                        <div class="input-group">
+                            <input type="text" id="code-input" placeholder="Enter Code..." autocomplete="off" />
+                            <button id="btn-submit-code" class="btn-terminal">SUBMIT CIPHER</button>
+                        </div>
+                        <div id="hint-box" class="hint-text hidden"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="cinematic-section" class="cinematic-container hidden">
+                <button id="btn-proceed-vault" class="btn-proceed-white hidden">PROCEED TO VAULT</button>
+            </section>
+        </main>
+
+        <aside class="sidebar-right">
+            <div class="sidebar-header">
+                <h2>EVENT PROGRESS</h2>
+                <div class="progress-bar-container">
+                    <div id="progress-bar-fill" class="progress-fill" style="width: 0%;"></div>
+                </div>
+                <span id="progress-percentage">0% COMPLETE</span>
+            </div>
+
+            <div class="claimed-skins-section">
+                <h3>CLAIMED REWARDS</h3>
+                <ul id="skins-list" class="skins-list">
+                    <li class="skin-item locked">
+                        <span class="skin-status">[ LOCKED ]</span>
+                        <span class="skin-name">Classified Reward</span>
+                    </li>
+                    <li class="skin-item locked">
+                        <span class="skin-status">[ LOCKED ]</span>
+                        <span class="skin-name">Classified Reward</span>
+                    </li>
+                    <li class="skin-item locked">
+                        <span class="skin-status">[ LOCKED ]</span>
+                        <span class="skin-name">Classified Reward</span>
+                    </li>
+                    <li class="skin-item locked">
+                        <span class="skin-status">[ LOCKED ]</span>
+                        <span class="skin-name">Classified Reward</span>
+                    </li>
+                    <li class="skin-item locked">
+                        <span class="skin-status">[ LOCKED ]</span>
+                        <span class="skin-name">Classified Reward</span>
+                    </li>
+                    <li class="skin-item locked">
+                        <span class="skin-status">[ LOCKED ]</span>
+                        <span class="skin-name">Classified Reward</span>
+                    </li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+
+    <section id="intro-text-section" class="intro-text-overlay hidden">
+        <div id="intro-text-box" class="intro-text-container"></div>
+    </section>
+
+    <section id="showcase-section" class="showcase-overlay hidden">
+        <div id="showcase-container"></div>
+    </section>
+
+    <section id="rewind-stats-section" class="rewind-overlay hidden"></section>
+
+    <script src="app.js"></script>
+    <script src="showcase.js"></script>
+</body>
+</html>
